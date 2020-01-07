@@ -1,2 +1,2 @@
-# flower-classifier
-classifier for AI programming with python nanodegree
+# AI Programming with Python Nanodegree 2019
+## Create a classifier for flower images using a pre-trained model
