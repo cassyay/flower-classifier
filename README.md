@@ -20,11 +20,11 @@ Create an image classifier that can be applied to any set of images using PyTorc
 - Use trained AlexNet classifier to predict flower classification 
 
 ## Content
+### Dataset
+- [Downloaded here](http://www.robots.ox.ac.uk/~vgg/data/flowers/102/index.html)
+
 ### Notebooks folder
 - `flower-classifier`: entire code run on Google Colab
 - `train.py`: code for training the model
 - `predict.py`: code for predicting images 
 
-### Datasets 
-- contains dataset for flower images
-- [Downloaded here](http://www.robots.ox.ac.uk/~vgg/data/flowers/102/index.html)
