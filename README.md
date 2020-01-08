@@ -6,10 +6,10 @@ Code to load, build, train, and test a pre-trained model to predict flower class
 
 ## Summary
 ### Software and libraries
-OS: Windows `10`
-Language: Python `3.7.3`
-Libraries: Pytorch `0.4.1`, Matplotlib `3.1`, Numpy `1.16`
-Framework: Google Colab
+OS: Windows `10` <br>
+Language: Python `3.7.3` <br>
+Libraries: Pytorch `0.4.1`, Matplotlib `3.1`, Numpy `1.16` <br>
+Framework: Google Colab <br>
 
 ### Motivation
 Create an image classifier that can be applied to any set of images using PyTorch.  Provide a template for deep learning projects using image recognition and pre-trained models.  
