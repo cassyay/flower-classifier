@@ -24,7 +24,8 @@ Create an image classifier that can be applied to any set of images using PyTorc
 - [Downloaded here](http://www.robots.ox.ac.uk/~vgg/data/flowers/102/index.html)
 
 ### Docs
-- `flower-classifier.ipynb`: entire code run on Google Colab
+- `flower-classifier.ipynb`: AlexNet training run on Google Colab
+- `flower-classifier-vgg16.ipynb`: VGG16 training run on Google Colab
 - `train.py`: code for training the model
 - `predict.py`: code for predicting images 
 
