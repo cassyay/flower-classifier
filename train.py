@@ -206,7 +206,7 @@ def train_model(epochs, training_loader, validation_loader, gpu, model, optimize
 def test_model(model, testing_loader, gpu, criterion):
     test_loss = 0
     accuracy = 0
-    model.eval()
+    model.to('cuda')
 
     
     with torch.no_grad():
@@ -261,6 +261,7 @@ def load_checkpoint(cat_to_name, arch):
     return model
 
     model = load_checkpoint('checkpoint.pth')
+    print(model)
     
 
 
