@@ -67,6 +67,29 @@ def predict(np_image, model, gpu, topk):
     probs, classes = predict(np_image, model, topk)
     return probs, classes
 
+def sanity_check(image): 
+    index = int(path.split('/')[1])
+    imagepath = test_dir + path
+    image = process_image(imagepath)
+
+    plot = imshow(image, ax = plt)
+    plot.axis('off')
+    plot.title(cat_to_name[str(index)])
+    plot.show()
+
+    axes = predict(imagepath, model)
+
+    yaxis = [cat_to_name[str(i)] for i in np.array(axes[1][0].cpu())]
+    y_pos = np.arange(len(yaxis))
+    xaxis = np.array(axes[0][0].cpu().numpy())   
+
+    plt.barh(y_pos, xaxis)
+    plt.xlabel('probability')
+    plt.yticks(y_pos, yaxis)
+    plt.title('probability of flower classification')
+
+    plt.show()
+
 def main():
         args = parse_args()
         
@@ -74,6 +97,7 @@ def main():
         
         prediction = predict(np_image, model, args.gpu, args.topk)
         
+        check = sanity_check(args.image)
         
         
 if __name__ == '__main__':
