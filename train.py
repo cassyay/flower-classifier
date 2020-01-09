@@ -1,3 +1,4 @@
+import json
 import torchvision 
 from torchvision import transforms, datasets
 import torch 
@@ -8,6 +9,20 @@ from torch import nn, optim
 import numpy as np
 import argparse
 import os
+from PIL import Image
+import torch.nn.functional as F
+import matplotlib.pyplot as plot 
+
+#check if GPU is available 
+
+check_gpu = torch.cuda.is_available()
+
+if not check_gpu:
+    print('Running on CPU, switch to GPU if possible ...')
+else:
+    print('Training on GPU ...')
+
+#create args 
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -23,12 +38,17 @@ def parse_args():
     args = parser.parse_args()
     return args
  
+#transform data 
+
 def transform(train_dir, valid_dir, test_dir):
     
     data_dir = 'flowers'
     train_dir = data_dir + '/train'
     valid_dir = data_dir + '/valid'
     test_dir = data_dir + '/test'
+
+    with open('cat_to_name.json', 'r') as f:
+        cat_to_name = json.load(f)
     
     training_transform = transforms.Compose([
         transforms.RandomRotation(90),
@@ -49,6 +69,8 @@ def transform(train_dir, valid_dir, test_dir):
     
     return training_transform, validation_transform, testing_transform
 
+#Load datasets with ImageFolder
+
 def train(training_transform, validation_transform, testing_transform):
     
     train_data = datasets.ImageFolder(train_dir, transform=training_transform)
@@ -56,7 +78,9 @@ def train(training_transform, validation_transform, testing_transform):
     testing_data = datasets.ImageFolder(test_dir, transform = testing_transform)
     
     return train_data, validation_data, testing_data
-    
+
+#Define dataloaders 
+
 def load_data(train_data, validation_data, testing_data):    
     training_loader = torch.utils.data.DataLoader(train_data, batch_size=32, shuffle=True) 
     validation_loader = torch.utils.data.DataLoader(validation_data, batch_size = 32)
@@ -85,8 +109,9 @@ def neural_network(model, gpu, hidden_units):
     
 
     if hidden_units == None:
-        hidden_units = [1024]
-    input_size = 9216
+        hidden_units = [1024, 256]
+    if input_size == None:
+        input_size = 9216
     output_size = 102
     
     if 'gpu' == True:
@@ -95,26 +120,23 @@ def neural_network(model, gpu, hidden_units):
         print('turn on gpu')
     
     model.classifier = nn.Sequential(OrderedDict([
-                      ('fc1', nn.Linear(input_size, hidden_units)),
+                      ('fc1', nn.Linear(input_size, hidden_units[0])),
                       ('relu1', nn.ReLU()),
                       ('dropout1', nn.Dropout(p=0.1)),
-                      ('fc2', nn.Linear(hidden_units, hidden_units)),
+                      ('fc2', nn.Linear(hidden_units[0], hidden_units[1])),
                       ('relu2', nn.ReLU()),
                       ('dropout2', nn.Dropout(p=0.1)),
-                      ('fc3', nn.Linear(hidden_units, output_size)),
+                      ('fc3', nn.Linear(hidden_units[1], output_size)),
                       ('output', nn.LogSoftmax(dim=1))]))
 
     classifier = model.classifier
+    criterion = nn.NLLLoss()
+    optimizer = optim.SGD(model.classifier.paramters(), lr=0.01)
+    model.cuda()
     
     return model 
     
-    print("Epoch: {}/{}..".format(e+1, epochs),
-          "Training loss: {:.3f}..".format(running_loss/len(print_every)),
-          "Validation loss {:.3f}..".format(validation_loss/len(validation_loader)),
-          "Test accuracy: {:.3f}".format(accuracy/len(validation_loader)))
-                
-    running_loss = 0
-    model.train()
+    
                           
     
 
@@ -125,17 +147,16 @@ def train_model(epochs, training_loader, validation_loader, gpu, model, optimize
     
     steps = 0
     print_every = 5
-    running_loss = 0
-    model.to('cuda')
     train_losses, validation_losses = [], []
     
     for e in range(epochs, gpu):
+        running_loss = 0
         for images, labels in training_loader: 
             steps += 1
             if gpu == 'True':
                 images, labels = images.to('cuda'), labels.to('cuda')
             else:
-                print('turn on gpu')
+                images, labels = images.to('cpu'), labels.to('cpu')
         
 
             optimizer.zero_grad()
@@ -157,7 +178,7 @@ def train_model(epochs, training_loader, validation_loader, gpu, model, optimize
                     if gpu == 'True':
                         images, labels = images.to('cuda'), labels.to('cuda')
                     else:
-                        print('turn on gpu')
+                        images, labels = images.to('cpu'), labels.to('cpu')
 
                     log_ps = model.forward(images)
                     batch_loss = criterion(log_ps, labels)
@@ -176,6 +197,8 @@ def train_model(epochs, training_loader, validation_loader, gpu, model, optimize
                         "Training loss: {:.3f}..".format(running_loss/len(training_loader)),
                         "Validation loss: {:.3f}..".format(validation_loss/len(validation_loader)),
                         "Test accuracy: {:.3f}".format(accuracy/len(validation_loader)))
+            running_loss = 0
+            model.train() 
         
     return model
 
